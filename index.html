@@ -319,6 +319,35 @@
     .gallery { grid-template-columns: 1fr; }
     footer { flex-direction: column; gap: 1rem; text-align: center; }
   }
+  /* Fullscreen image viewer */
+  .image-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 5000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.94);
+  }
+  .image-modal.open { display: flex; }
+  .image-modal img {
+    width: 100vw;
+    height: 100vh;
+    object-fit: contain;
+  }
+  .image-modal-close {
+    position: fixed;
+    top: 18px;
+    right: 24px;
+    z-index: 5001;
+    border: 0;
+    background: transparent;
+    color: #fff;
+    font-size: 2.8rem;
+    line-height: 1;
+    cursor: none;
+  }
+  .card-img-wrap img { cursor: none; }
 </style>
 </head>
 <body>
@@ -508,8 +537,6 @@
         <span class="contact-card-label">Discord</span>
         <span class="contact-card-value">tanvik_</span>
       </a>
-     
-    
     </div>
     <div class="contact-note">
       🟢 &nbsp;Currently open for commissions · Java &amp; Bedrock · 70+ builds delivered
@@ -517,6 +544,10 @@
   </div>
 </section>
 
+<div class="image-modal" id="image-modal" aria-hidden="true">
+  <button class="image-modal-close" id="image-modal-close" aria-label="Close fullscreen image">&times;</button>
+  <img id="image-modal-img" alt="Fullscreen Minecraft build preview">
+</div>
 <!-- FOOTER -->
 <footer>
   <p>© 2026 Tanishk Vashistha · Tanvik_</p>
@@ -554,6 +585,33 @@
     });
   }, { threshold: 0.1 });
   document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+  // Fullscreen build images
+  const imageModal = document.getElementById('image-modal');
+  const imageModalImg = document.getElementById('image-modal-img');
+  const imageModalClose = document.getElementById('image-modal-close');
+
+  function closeImageModal() {
+    imageModal.classList.remove('open');
+    imageModal.setAttribute('aria-hidden', 'true');
+    imageModalImg.removeAttribute('src');
+  }
+
+  document.querySelectorAll('.card-img-wrap img').forEach(img => {
+    img.addEventListener('click', () => {
+      imageModalImg.src = img.src;
+      imageModalImg.alt = img.alt || 'Fullscreen Minecraft build preview';
+      imageModal.classList.add('open');
+      imageModal.setAttribute('aria-hidden', 'false');
+    });
+  });
+
+  imageModal.addEventListener('click', e => {
+    if (e.target === imageModal || e.target === imageModalImg) closeImageModal();
+  });
+  imageModalClose.addEventListener('click', closeImageModal);
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && imageModal.classList.contains('open')) closeImageModal();
+  });
 </script>
 </body>
 </html>
